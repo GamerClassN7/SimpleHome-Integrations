@@ -1,0 +1,13 @@
+{
+    "name": "PiHole",
+    "alias": "pihole",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\PiHole\\Providers\\PiHoleServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

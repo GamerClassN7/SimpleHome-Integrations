@@ -8,6 +8,9 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
+use App\Helpers\SettingManager;
+
 
 use App\Models\Devices;
 use App\Models\Properties;
@@ -65,15 +68,19 @@ class fetch implements ShouldQueue
             }
         }', true);
         
+        if(filter_var(SettingManager::get("ipAddress", "pihole")->value, FILTER_VALIDATE_IP)){
+            die();
+        }
+        
         $token = Str::lower(md5("pihole"));
-        $response = Http::withHeaders([])->post('https://' . SettingManager::get("ipAddress", "pihole")->value . '/admin/api.php');
+        $response = Http::withHeaders([])->post('http://' . SettingManager::get("ipAddress", "pihole")->value . '/admin/api.php');
         
         $metrics = [
             "domains_being_blocked",
             "ads_percentage_today",
             "ads_blocked_today",
             "dns_queries_today",
-            "unique_clients",
+            "unique_clients"
         ];
         
         $metricsIcons = [
@@ -81,13 +88,20 @@ class fetch implements ShouldQueue
             "fas fa-chart-pie",
             "fas fa-hand-paper",
             "fas fa-globe",
-            "fas fa-network-wired",
+            "fas fa-network-wired"
+        ];
+        
+        $metricsFriendlyName = [
+            "Blocked Domains",
+            "Blocked Percent",
+            "Blocked",
+            "Queries",
+            "Clients",
         ];
         
         $defaultRoom = Rooms::where('default', true)->first()->id;
         
         if ($response->ok() && $response->json()) {
-            
             $jsonResponse = $response->json();
             
             $device = Devices::where('token', $token)->First();
@@ -97,18 +111,17 @@ class fetch implements ShouldQueue
                 if (!$device->approved)
                 return;
                 
-                foreach ($metrics as $metric_key => $metric) {
-                    
-                    if (!isset($jsonResponse[$metric])){
-                        continue;
-                    }
+                foreach ($metrics as $metric) {
+                    if (!isset($jsonResponse[$metric]))
+                    continue;
                     
                     $property = Properties::where('type', $metric)->First();
+                    
                     if ($property == false) {
                         $property = new Properties();
                         $property->device_id = $device->id;
                         $property->room_id = $defaultRoom;
-                        $property->nick_name = "pihole" . ":" . $metric;
+                        $property->nick_name = $metricsName[$metric_key];
                         $property->icon = $metricsIcons[$metric_key];
                         $property->type = $metric;
                         $property->save();
@@ -131,7 +144,6 @@ class fetch implements ShouldQueue
                 $device->sleep = 300000;
                 $device->save();
             }
-            }
         }
     }
-    
+}

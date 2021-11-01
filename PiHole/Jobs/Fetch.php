@@ -108,12 +108,14 @@ class fetch implements ShouldQueue
             if ($device !== false) {
                 $device->setHeartbeat();
                 
-                if (!$device->approved)
-                return;
+                if (!$device->approved) {
+                    die();
+                }
                 
                 foreach ($metrics as $metric) {
-                    if (!isset($jsonResponse[$metric]))
-                    continue;
+                    if (!isset($jsonResponse[$metric])) {
+                        continue;
+                    }
                     
                     $property = Properties::where('type', $metric)->First();
                     

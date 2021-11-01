@@ -117,13 +117,13 @@ class fetch implements ShouldQueue
                         continue;
                     }
                     
-                    $property = Properties::where('type', $metric)->First();
+                    $property = Properties::where('type', $metric)->where('device_id', $device->id)->First();
                     
                     if ($property == false) {
                         $property = new Properties();
                         $property->device_id = $device->id;
                         $property->room_id = $defaultRoom;
-                        $property->nick_name = $metricsName[$metric_key];
+                        $property->nick_name = "pihole".$metricsName[$metric_key];
                         $property->icon = $metricsIcons[$metric_key];
                         $property->type = $metric;
                         $property->save();

@@ -33,7 +33,7 @@ class PiHoleServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(module_path($this->moduleName, 'Database/Migrations'));
         $this->registerSettings();
         
-        //(new Fetch)->handle();
+        (new Fetch)->handle();
         
         $this->app->booted(function () {
             $schedule = $this->app->make(Schedule::class);

@@ -67,7 +67,23 @@ class fetch implements ShouldQueue
 
         $token = Str::lower(md5("pihole"));
         $response = Http::withHeaders([])->post('https://' . SettingManager::get("ipAddress", "pihole")->value . '/admin/api.php');
-        $metrics = ["unique_clients", "dns_queries_today","ads_blocked_today"];
+
+        $metrics = [
+            "domains_being_blocked",
+            "ads_percentage_today",
+            "ads_blocked_today",
+            "dns_queries_today",
+            "unique_clients"
+        ];
+
+        $metricsIcons = [
+            "fas fa-list",
+            "fas fa-chart-pie",
+            "fas fa-hand-paper",
+            "fas fa-globe",
+            "fas fa-network-wired"
+        ];
+
         $defaultRoom = Rooms::where('default', true)->first()->id;
 
         if ($response->ok() && $response->json()) {

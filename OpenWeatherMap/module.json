@@ -1,0 +1,13 @@
+{
+    "name": "OpenWeatherMap",
+    "alias": "openweathermap",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\OpenWeatherMap\\Providers\\OpenWeatherMapServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

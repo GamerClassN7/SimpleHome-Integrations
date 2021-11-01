@@ -66,7 +66,7 @@ class fetch implements ShouldQueue
         }', true);
         
         $token = Str::lower(md5("pihole"));
-        //$response = Http::withHeaders([])->post('https://' . SettingManager::get("ipAddress", "pihole")->value . '/admin/api.php');
+        $response = Http::withHeaders([])->post('https://' . SettingManager::get("ipAddress", "pihole")->value . '/admin/api.php');
         
         $metrics = [
             "domains_being_blocked",
@@ -87,6 +87,7 @@ class fetch implements ShouldQueue
         $defaultRoom = Rooms::where('default', true)->first()->id;
         
         if ($response->ok() && $response->json()) {
+            
             $jsonResponse = $response->json();
             
             $device = Devices::where('token', $token)->First();
@@ -130,6 +131,7 @@ class fetch implements ShouldQueue
                 $device->sleep = 300000;
                 $device->save();
             }
+            }
         }
     }
-}
+    

@@ -75,7 +75,7 @@ class fetch implements ShouldQueue
                 return false;
             }
             
-            $response = Http::withHeaders([])->get('api.openweathermap.org/data/2.5/weather?q=' . SettingManager::get("city", "openweathermap")->value . '&appid=' . SettingManager::get("apiToken", "openweathermap")->value);
+            $response = Http::withHeaders([])->get('api.openweathermap.org/data/2.5/weather?q=' . SettingManager::get("city", "openweathermap")->value . '&appid=' . SettingManager::get("apiToken", "openweathermap")->value . '&units=metric');
             if ($response->ok() && $response->json()) {
                 $jsonResponse = $response->json();
                 
@@ -84,14 +84,14 @@ class fetch implements ShouldQueue
                         continue;
                     }
                     
-                    $property = Properties::where('type', $metric)->where('device_id', $device->id)->First();
+                    $property = Properties::where('type', $this->getMetricSlug($metric))->where('device_id', $device->id)->First();
                     if ($property == null) {
                         $property = new Properties();
                         $property->device_id = $device->id;
                         $property->room_id = $defaultRoom;
                         $property->nick_name = "openweathermap".$metricsFriendlyName["main"][$metric_key];
                         $property->icon = $metricsIcons["main"][$metric_key];
-                        $property->type = $metric;
+                        $property->type = $this->getMetricSlug($metric);
                         $property->save();
                     }
                     
@@ -113,4 +113,17 @@ class fetch implements ShouldQueue
         } 
         return true;
     } 
+
+    private function getMetricSlug($metricCode){
+        $metricsSlugs = [
+            "humidity" => "humi"
+        ];
+
+        if (!in_array($metricCode, $metricSlugs)){
+            return $metricCode;
+        }
+
+        return $metricsSlugs[$metricCode];
+
+    }
 } 

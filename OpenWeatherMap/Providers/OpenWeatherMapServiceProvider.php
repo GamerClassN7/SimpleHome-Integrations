@@ -34,10 +34,12 @@ class OpenWeatherMapServiceProvider extends ServiceProvider
         $this->registerSettings();
         
         //(new Fetch)->handle();
-        
+        //  $schedule = $this->app->make(Schedule::class);
+        //     $schedule->job(new Fetch)->withoutOverlapping()->everyMinute();
+
         $this->app->booted(function () {
             $schedule = $this->app->make(Schedule::class);
-            $schedule->command('simplehome:fetch:openweathermap')->name('owm_fetch')->withoutOverlapping()->everyFiveMinutes();
+            $schedule->job(new Fetch)->withoutOverlapping()->everyMinute();
         });
     }
 

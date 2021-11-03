@@ -7,7 +7,9 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+
 use Modules\OpenWeatherMap\Jobs\Fetch;
+
 use App\Helpers\SettingManager;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
@@ -28,7 +30,6 @@ class fetch implements ShouldQueue
     */
     public function __construct()
     {
-        //
     }
     
     /**
@@ -71,9 +72,7 @@ class fetch implements ShouldQueue
             $device->setHeartbeat();
             
             if (!$device->approved) {
-                $this->delete();
-                return;
-                die();
+                return false;
             }
             
             $response = Http::withHeaders([])->get('api.openweathermap.org/data/2.5/weather?q=' . SettingManager::get("city", "openweathermap")->value . '&appid=' . SettingManager::get("apiToken", "openweathermap")->value);
@@ -95,7 +94,7 @@ class fetch implements ShouldQueue
                         $property->type = $metric;
                         $property->save();
                     }
-
+                    
                     $record = new Records();
                     $record->property_id = $property->id;
                     $record->value = (int) round($jsonResponse["main"][$metric]);
@@ -112,6 +111,6 @@ class fetch implements ShouldQueue
             $device->sleep = 300000;
             $device->save();
         } 
-        $this->delete();
+        return true;
     } 
 } 

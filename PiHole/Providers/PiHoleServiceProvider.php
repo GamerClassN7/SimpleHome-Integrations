@@ -37,7 +37,7 @@ class PiHoleServiceProvider extends ServiceProvider
         
         $this->app->booted(function () {
             $schedule = $this->app->make(Schedule::class);
-            $schedule->job(new Fetch(), 'pihole')->name('ph_fetch')->withoutOverlapping()->everyFiveMinutes();
+            $schedule->job(new Fetch())->withoutOverlapping()->everyFiveMinutes();
         });
     }
 

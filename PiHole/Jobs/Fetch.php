@@ -69,6 +69,8 @@ class fetch implements ShouldQueue
         }', true);
         
         if(filter_var(SettingManager::get("ipAddress", "pihole")->value, FILTER_VALIDATE_IP)){
+           $this->delete();
+            return;
             die();
         }
         
@@ -109,6 +111,8 @@ class fetch implements ShouldQueue
                 $device->setHeartbeat();
                 
                 if (!$device->approved) {
+                    $this->delete();
+                    return;
                     die();
                 }
                 
@@ -146,6 +150,7 @@ class fetch implements ShouldQueue
                 $device->sleep = 300000;
                 $device->save();
             }
+            $this->delete();
         }
     }
 }

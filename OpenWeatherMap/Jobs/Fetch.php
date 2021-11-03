@@ -71,6 +71,8 @@ class fetch implements ShouldQueue
             $device->setHeartbeat();
             
             if (!$device->approved) {
+                $this->delete();
+                return;
                 die();
             }
             
@@ -110,5 +112,6 @@ class fetch implements ShouldQueue
             $device->sleep = 300000;
             $device->save();
         } 
+        $this->delete();
     } 
 } 

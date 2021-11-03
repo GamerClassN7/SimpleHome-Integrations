@@ -33,11 +33,11 @@ class OpenWeatherMapServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(module_path($this->moduleName, 'Database/Migrations'));
         $this->registerSettings();
         
-        //(new Fetch)->handle();
+        // (new Fetch)->handle();
         
         $this->app->booted(function () {
             $schedule = $this->app->make(Schedule::class);
-            $schedule->job(new Fetch(), 'pihole')->everyFiveMinutes()->withoutOverlapping();
+            $schedule->job(new Fetch(), 'openweathermap')->name('owm_fetch')->withoutOverlapping()->everyFiveMinutes();
         });
     }
 

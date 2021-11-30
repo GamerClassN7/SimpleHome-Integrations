@@ -1,0 +1,13 @@
+{
+    "name": "ShellyCloud",
+    "alias": "shellycloud",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ShellyCloud\\Providers\\ShellyCloudServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

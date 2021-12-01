@@ -48,7 +48,7 @@ class fetch implements ShouldQueue
         if ($response->ok() === false) {
             return;
         }
-v
+
         foreach ($response->json()["data"]["devices_status"]  as $device_token => $device_status) {
             $device = Devices::where('token', Str::lower($device_token))->First();
             if ($device === false) {
@@ -63,7 +63,7 @@ v
             if (isset($device_status["relays"]) && count($device_status["relays"]) > 0) {
                 foreach ($device_status["relays"] as $key => $relay) {
                     $pseudoId = (int) $key;
-                    $property = Properties::where('nick_name', $device->hostname . ':relay_' . ($pseudoId + 1))->First();
+                    $property = Properties::where('nick_name', "shellycloud." . $device->hostname . ':relay_' . ($pseudoId + 1))->First();
                     if (!isset($property->last_value->value) || $property->last_value->value != (int) $relay["ison"]) {
                         $record = new Records();
                         $record->property_id = $property->id;

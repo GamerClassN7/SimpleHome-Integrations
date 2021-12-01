@@ -69,19 +69,13 @@ class fetch implements ShouldQueue
         $device = Devices::where('token', $token)->First();
 
         if ($device === false) {
-            $device = new Devices();
-            $device->token = $token;
-            $device->hostname = "openweathermap";
-            $device->type = "custome";
-            $device->approved = 0;
-            $device->sleep = 300000;
-            $device->save();
+
             return false;
         }
 
         if (!$device->approved) {
             $device->setHeartbeat();
-
+            $this->createDevice($token);
             return false;
         }
 
@@ -102,20 +96,10 @@ class fetch implements ShouldQueue
             $property = Properties::where('type', $this->getMetricSlug($metric))->where('device_id', $device->id)->First();
 
             if ($property == null) {
-                $property = new Properties();
-                $property->device_id = $device->id;
-                $property->room_id = $defaultRoom;
-                $property->nick_name = "openweathermap" . $metricsFriendlyName["main"][$metric_key];
-                $property->icon = $metricsIcons["main"][$metric_key];
-                $property->type = $this->getMetricSlug($metric);
-                $property->save();
+                $this->createProperti($device->id, $defaultRoom, $metricsFriendlyName["main"][$metric_key], $metricsIcons["main"][$metric_key], $metric);
             }
 
-            $record = new Records();
-            $record->property_id = $property->id;
-            $record->value = (int) round($jsonResponse["main"][$metric]);
-            $record->done = true;
-            $record->save();
+            $this->createRecord($property->id, $jsonResponse["main"][$metric]);
         }
 
         return true;
@@ -132,5 +116,36 @@ class fetch implements ShouldQueue
         }
 
         return $metricsSlugs[$metricCode];
+    }
+
+    private function createProperti($deviceId, $defaultRoomId, $metricsFriendlyName, $metricIcon, $metric)
+    {
+        $property = new Properties();
+        $property->device_id = $deviceId;
+        $property->room_id = $defaultRoomId;
+        $property->nick_name = "openweathermap." . $metricsFriendlyName;
+        $property->icon = $metricIcon;
+        $property->type = $this->getMetricSlug($metric);
+        $property->save();
+    }
+
+    private function createDevice($token)
+    {
+        $device = new Devices();
+        $device->token = $token;
+        $device->hostname = "openweathermap";
+        $device->type = "custome";
+        $device->approved = 0;
+        $device->sleep = 300000;
+        $device->save();
+    }
+
+    private function createRecord($propertyId, $value)
+    {
+        $record = new Records();
+        $record->property_id = $propertyId;
+        $record->value = (int) round($value);
+        $record->done = true;
+        $record->save();
     }
 }

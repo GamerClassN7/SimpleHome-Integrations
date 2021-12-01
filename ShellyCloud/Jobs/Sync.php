@@ -74,21 +74,21 @@ class sync implements ShouldQueue
                     $device->save();
                 }
 
-                if (Properties::where('nick_name', $ShellyDevice["name"] . ":rssi")->count() == 0) {
+                if (Properties::where('nick_name', "shellycloud." . $ShellyDevice["name"] . ":rssi")->count() == 0) {
                     $property = new Properties();
                     $property->device_id = $device->id;
                     $property->room_id = $roomId;
-                    $property->nick_name = $ShellyDevice["name"] . ":rssi";
+                    $property->nick_name = "shellycloud." . $ShellyDevice["name"] . ".rssi";
                     $property->icon = "fa-wifi";
                     $property->type = "wifi";
                     $property->save();
                 }
 
-                if (Properties::where('nick_name', $ShellyDevice["name"] . ":power")->count() == 0) {
+                if (Properties::where('nick_name', "shellycloud." .  $ShellyDevice["name"] . ":power")->count() == 0) {
                     $property = new Properties();
                     $property->device_id = $device->id;
                     $property->room_id = $roomId;
-                    $property->nick_name = $ShellyDevice["name"] . ":power";
+                    $property->nick_name = "shellycloud." . $ShellyDevice["name"] . ".power";
                     $property->icon = "fa-bolt";
                     $property->type = "power";
                     $property->units = "W";
@@ -96,16 +96,16 @@ class sync implements ShouldQueue
                 }
 
                 for ($i = 1; $i <= $ShellyDevice["channels_count"]; $i++) {
-                    if (Properties::where('nick_name', $ShellyDevice["name"] . ":relay_" . $i)->count() == 0) {
+                    if (Properties::where('nick_name', "shellycloud." . $ShellyDevice["name"] . ":relay_" . $i)->count() == 0) {
                         $property = new Properties();
                         $property->device_id = $device->id;
                         $property->room_id = $roomId;
-                        $property->nick_name = $ShellyDevice["name"] . ":relay_" . $i;
+                        $property->nick_name = "shellycloud." . $ShellyDevice["name"] . ".relay_" . $i;
                         $property->icon = "fa-wifi";
                         $property->type = $ShellyDevice["category"];
 
                         $property->save();
-                    } elseif ($property = Properties::where('nick_name', $ShellyDevice["name"] . 'relay_' . $i)->First()) {
+                    } elseif ($property = Properties::where('nick_name', "shellycloud." . $ShellyDevice["name"] . 'relay_' . $i)->First()) {
                         $property->room_id = $roomId;
                         $property->save();
                     }

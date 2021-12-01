@@ -1,24 +1,22 @@
 <?php
 
-namespace Modules\OpenWeatherMap\Providers;
+namespace Modules\Mqtt\Providers;
 
 use App\Helpers\SettingManager;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Support\ServiceProvider;
-use Modules\OpenWeatherMap\Jobs\Fetch;
 
-class OpenWeatherMapServiceProvider extends ServiceProvider
+class MqttServiceProvider extends ServiceProvider
 {
     /**
      * @var string $moduleName
      */
-    protected $moduleName = 'OpenWeatherMap';
+    protected $moduleName = 'Mqtt';
 
     /**
      * @var string $moduleNameLower
      */
-    protected $moduleNameLower = 'openweathermap';
+    protected $moduleNameLower = 'mqtt';
 
     /**
      * Boot the application events.
@@ -27,27 +25,25 @@ class OpenWeatherMapServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->registerConfig();
         $this->registerSettings();
-
-        //(new Fetch)->handle();
-        //  $schedule = $this->app->make(Schedule::class);
-        //     $schedule->job(new Fetch)->withoutOverlapping()->everyMinute();
-
-        $this->app->booted(function () {
-            $schedule = $this->app->make(Schedule::class);
-            $schedule->job(new Fetch)->withoutOverlapping()->everyMinute();
-        });
+        $this->registerConfig();
     }
 
     public function registerSettings()
     {
-        $index = "city";
+        $index = "server";
         if (SettingManager::get($index, $this->moduleNameLower) == null) {
             SettingManager::register($index, true, 'string', $this->moduleNameLower);
         }
-
-        $index = "apiToken";
+        $index = "port";
+        if (SettingManager::get($index, $this->moduleNameLower) == null) {
+            SettingManager::register($index, true, 'int', $this->moduleNameLower);
+        }
+        $index = "username";
+        if (SettingManager::get($index, $this->moduleNameLower) == null) {
+            SettingManager::register($index, true, 'string', $this->moduleNameLower);
+        }
+        $index = "password";
         if (SettingManager::get($index, $this->moduleNameLower) == null) {
             SettingManager::register($index, true, 'string', $this->moduleNameLower);
         }

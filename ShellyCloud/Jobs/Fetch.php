@@ -48,14 +48,13 @@ class fetch implements ShouldQueue
         if ($response->ok() === false) {
             return;
         }
-
+v
         foreach ($response->json()["data"]["devices_status"]  as $device_token => $device_status) {
             $device = Devices::where('token', Str::lower($device_token))->First();
-            $device->setHeartbeat();
-
             if ($device === false) {
                 return false;
             }
+            $device->setHeartbeat();
 
             if (!$device->approved) {
                 return false;

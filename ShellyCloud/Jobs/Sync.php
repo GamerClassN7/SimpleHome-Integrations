@@ -37,9 +37,10 @@ class sync implements ShouldQueue
     public function handle()
     {
         $response = Http::withHeaders([
-            "Authorization" => "Bearer " . SettingManager::get("apiToken", "shellycloud")->value,
             "Content-Type" => "application/x-www-form-urlencoded",
-        ])->get('https://' . SettingManager::get("apiServerLocation", "shellycloud")->value . '.cloud/interface/device/get_all_lists');
+        ])->get('https://' . SettingManager::get("apiServerLocation", "shellycloud")->value . '.cloud/interface/device/get_all_lists', [
+            'auth_key' => SettingManager::get("apiToken", "shellycloud")->value
+        ]);
 
         if ($response->ok()) {
             /*Room Sync*/

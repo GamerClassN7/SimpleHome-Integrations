@@ -63,7 +63,7 @@ class fetch implements ShouldQueue
             if (isset($device_status["relays"]) && count($device_status["relays"]) > 0) {
                 foreach ($device_status["relays"] as $key => $relay) {
                     $pseudoId = (int) $key;
-                    $property = Properties::where('nick_name', "shellycloud." . $device->hostname . ':relay_' . ($pseudoId + 1))->First();
+                    $property = Properties::where('nick_name', "shellycloud." . $device->hostname . '.relay_' . ($pseudoId + 1))->First();
                     if (!isset($property->last_value->value) || $property->last_value->value != (int) $relay["ison"]) {
                         $record = new Records();
                         $record->property_id = $property->id;
@@ -106,7 +106,7 @@ class fetch implements ShouldQueue
                             ],
                             */
 
-            $property = Properties::where('nick_name', $device->hostname . ':rssi')->First();
+            $property = Properties::where('nick_name', "shellycloud." . $device->hostname . '.rssi')->First();
             if (!isset($property->last_value->value) || $property->last_value->value != $device_status["wifi_sta"]["rssi"]) {
                 $record = new Records();
                 $record->property_id = $property->id;

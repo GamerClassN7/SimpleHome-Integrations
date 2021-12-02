@@ -3,7 +3,9 @@
 namespace Modules\ShellyCloud\Console;
 
 use Illuminate\Console\Command;
+use Modules\ShellyCloud\Jobs\Fetch;
 use Modules\ShellyCloud\Jobs\Sync;
+
 
 class SyncCommand extends Command
 {
@@ -39,6 +41,10 @@ class SyncCommand extends Command
     public function handle()
     {
         Sync::dispatchNow();
+        $this->info('Synchronization done!');
+        Fetch::dispatchNow();
+        $this->info('Running Fetch to add get states!');
+
         return 0;
     }
 }

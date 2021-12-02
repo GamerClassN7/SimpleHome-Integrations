@@ -38,10 +38,17 @@ class FetchCommand extends Command
      */
     public function handle()
     {
+        $this->info('API will be fetched 3 times due to limitation of laravel running task each minute only...');
         Fetch::dispatchNow();
-        sleep(3);
-        Fetch::dispatchNow();
+        $this->info('First fetch done!');
+        sleep(15);
 
+        Fetch::dispatchNow();
+        $this->info('Second fetch done!');
+        sleep(15);
+
+        Fetch::dispatchNow();
+        $this->info('Thirth fetch done!');
         return 0;
     }
 }

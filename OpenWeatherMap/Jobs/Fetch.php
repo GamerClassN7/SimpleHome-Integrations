@@ -95,7 +95,7 @@ class fetch implements ShouldQueue
             $property = Properties::where('type', $this->getMetricSlug($metric))->where('device_id', $device->id)->First();
 
             if ($property == null) {
-                $this->createProperti($device->id, $defaultRoom, $metricsFriendlyName["main"][$metric_key], $metricsIcons["main"][$metric_key], $metric);
+                $this->createProperti($device->id, $defaultRoom, $metricsFriendlyName["main"][$metric_key], $metricsIcons["main"][$metric_key], $metricsFriendlyName["main"][$metric_key]);
             }
 
             $this->createRecord($property->id, $jsonResponse["main"][$metric]);
@@ -107,7 +107,8 @@ class fetch implements ShouldQueue
     private function getMetricSlug($metricCode)
     {
         $metricsSlugs = [
-            "humidity" => "humi"
+            "humidity" => "humi",
+            "pressure" => "press",
         ];
 
         if (!in_array($metricCode, $metricsSlugs)) {

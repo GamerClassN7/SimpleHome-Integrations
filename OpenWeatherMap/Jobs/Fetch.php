@@ -75,7 +75,6 @@ class fetch implements ShouldQueue
 
         if (!$device->approved) {
             $device->setHeartbeat();
-            $this->createDevice($token);
             return false;
         }
 

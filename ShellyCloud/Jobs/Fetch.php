@@ -64,6 +64,8 @@ class fetch implements ShouldQueue
                 foreach ($device_status["relays"] as $key => $relay) {
                     $pseudoId = (int) $key;
                     $property = Properties::where('nick_name', "shellycloud." . $device->hostname . '.relay_' . ($pseudoId + 1))->First();
+
+
                     if (!isset($property->last_value->value) || $property->last_value->value != (int) $relay["ison"]) {
                         $record = new Records();
                         $record->property_id = $property->id;

@@ -58,8 +58,8 @@ class sync implements ShouldQueue
         $property = new Properties();
         $property->device_id = $device->id;
         $property->room_id = $roomId;
-        $property->nick_name = "shellycloud." . $device->hostname . "." . ($type == "wifi" ? "rssi" : "") . ($iterator == null ? "" : ("_"  . $iterator));
-        $property->icon = "fa-wifi";
+        $property->nick_name = "shellycloud." . $device->hostname . "." . ($type == "wifi" ? "rssi" : $type) . ($iterator == null ? "" : ("_"  . $iterator));
+        $property->icon = $icon;
         $property->type = $type;
         $property->save();
         return $property;
@@ -120,7 +120,7 @@ class sync implements ShouldQueue
 
         for ($i = 1; $i <= $deviceData["channels_count"]; $i++) {
             if (Properties::where('nick_name', "shellycloud." . $deviceData["name"] . ".relay_" . $i)->count() == 0) {
-                $this->createProperty($device, "relay", $roomId, "fa-on-off", "", $i);
+                $this->createProperty($device, "relay", $roomId, "fa-power-off", "", $i);
             } elseif ($property = Properties::where('nick_name', "shellycloud." . $deviceData["name"] . 'relay_' . $i)->First()) {
                 $property->room_id = $roomId;
                 $property->save();

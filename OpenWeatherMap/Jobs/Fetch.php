@@ -50,9 +50,9 @@ class fetch implements ShouldQueue
 
         $metricsIcons = [
             "main" => [
-                "fas fa-list",
-                "fas fa-chart-pie",
-                "fas fa-hand-paper",
+                "fa-thermometer-empty",
+                "fa-tint",
+                "fa-tachometer-alt",
             ],
         ];
 
@@ -66,12 +66,13 @@ class fetch implements ShouldQueue
 
         $token = Str::lower(md5("openweathermap"));
         $defaultRoom = Rooms::where('default', true)->first()->id;
-        $device = Devices::where('token', $token)->First();
+        $device = Devices::where('token', $token)->where('integration', "openweathermap")->First();
 
-        if ($device === false) {
-
+        if (null == $device) {
+            $device = $this->createDevice($token);
             return false;
         }
+
 
         if (!$device->approved) {
             $device->setHeartbeat();
@@ -84,20 +85,16 @@ class fetch implements ShouldQueue
         }
         $device->setHeartbeat();
 
-
         $jsonResponse = $response->json();
-
         foreach ($metrics["main"] as $metric_key => $metric) {
             if (!isset($jsonResponse["main"][$metric])) {
                 continue;
             }
 
-            $property = Properties::where('type', $this->getMetricSlug($metric))->where('device_id', $device->id)->First();
-
-            if ($property == null) {
-                $this->createProperti($device->id, $defaultRoom, $metricsFriendlyName["main"][$metric_key], $metricsIcons["main"][$metric_key], $metricsFriendlyName["main"][$metric_key]);
+            $property = Properties::where('type', $this->getMetricSlug($metricsFriendlyName["main"][$metric_key]))->where('device_id', $device->id)->First();
+            if (null == $property) {
+                $property = $this->createProperti($device->id, $defaultRoom, $metricsFriendlyName["main"][$metric_key], $metricsIcons["main"][$metric_key], $metricsFriendlyName["main"][$metric_key]);
             }
-
             $this->createRecord($property->id, $jsonResponse["main"][$metric]);
         }
 
@@ -111,7 +108,7 @@ class fetch implements ShouldQueue
             "pressure" => "press",
         ];
 
-        if (!in_array($metricCode, $metricsSlugs)) {
+        if (!in_array(Str::lower($metricCode), $metricsSlugs)) {
             return $metricCode;
         }
 
@@ -127,6 +124,7 @@ class fetch implements ShouldQueue
         $property->icon = $metricIcon;
         $property->type = $this->getMetricSlug($metric);
         $property->save();
+        return $property;
     }
 
     private function createDevice($token)
@@ -134,10 +132,12 @@ class fetch implements ShouldQueue
         $device = new Devices();
         $device->token = $token;
         $device->hostname = "openweathermap";
+        $device->integration = "openweathermap";
         $device->type = "custome";
         $device->approved = 0;
         $device->sleep = 300000;
         $device->save();
+        return $device;
     }
 
     private function createRecord($propertyId, $value)
@@ -148,5 +148,6 @@ class fetch implements ShouldQueue
         $record->origin = 'module:openweathermap';
         $record->done = true;
         $record->save();
+        return $record;
     }
 }

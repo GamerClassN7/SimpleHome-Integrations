@@ -48,11 +48,18 @@ class DiscoveryJob implements ShouldQueue
         }
 
         $device->setHeartbeat();
-        $defaultRoomId = Rooms::where('default', true)->first()->id;
-        $property = Properties::where('type', 'state')->where('device_id', $device->id)->First();
+        if (!$device->approved) {
+            return false;
+        }
 
+        $defaultRoom = Rooms::where('default', true)->first();
+        if (null == $defaultRoom) {
+            return false;
+        }
+
+        $property = Properties::where('type', 'event')->where('device_id', $device->id)->first();
         if (null == $property) {
-            $this->createProperti($device->id, $defaultRoomId, 'sun_state', "fa-sun", 'state');
+            $this->createProperti($device->id, $defaultRoom->id, 'sun_state', "fa-sun", 'event');
             return true;
         }
         return true;

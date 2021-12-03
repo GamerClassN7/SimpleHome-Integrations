@@ -70,6 +70,7 @@ class fetch implements ShouldQueue
                         $record = new Records();
                         $record->property_id = $property->id;
                         $record->value = (int) $relay["ison"];
+                        $record->origin = 'module:shelly';
                         $record->done = true;
                         $record->save();
                     }
@@ -113,6 +114,7 @@ class fetch implements ShouldQueue
                 $record = new Records();
                 $record->property_id = $property->id;
                 $record->value = $device_status["wifi_sta"]["rssi"];
+                $record->origin = 'module:shelly';
                 $record->done = true;
                 $record->save();
             }

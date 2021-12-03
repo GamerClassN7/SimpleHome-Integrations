@@ -2,44 +2,44 @@
 
 namespace Modules\PiHole\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Http;
 use App\Helpers\SettingManager;
-
-
 use App\Models\Devices;
 use App\Models\Properties;
 use App\Models\Records;
 use App\Models\Rooms;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+
+
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 
 class fetch implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    
+
     /**
-    * Create a new job instance.
-    *
-    * @return void
-    */
+     * Create a new job instance.
+     *
+     * @return void
+     */
     public function __construct()
     {
         //
     }
-    
+
     /**
-    * Execute the job.
-    *
-    * @return void
-    */
+     * Execute the job.
+     *
+     * @return void
+     */
     public function handle()
     {
-        
+
         $test_Json = json_decode('{
             "domains_being_blocked": 125253,
             "dns_queries_today": 9062,
@@ -67,16 +67,16 @@ class fetch implements ShouldQueue
                 }
             }
         }', true);
-        
-        if(filter_var(SettingManager::get("ipAddress", "pihole")->value, FILTER_VALIDATE_IP)){
-           $this->delete();
+
+        if (filter_var(SettingManager::get("ipAddress", "pihole")->value, FILTER_VALIDATE_IP)) {
+            $this->delete();
             return;
             die();
         }
-        
+
         $token = Str::lower(md5("pihole"));
         $response = Http::withHeaders([])->post('http://' . SettingManager::get("ipAddress", "pihole")->value . '/admin/api.php');
-        
+
         $metrics = [
             "domains_being_blocked",
             "ads_percentage_today",
@@ -84,7 +84,7 @@ class fetch implements ShouldQueue
             "dns_queries_today",
             "unique_clients"
         ];
-        
+
         $metricsIcons = [
             "fas fa-list",
             "fas fa-chart-pie",
@@ -92,7 +92,7 @@ class fetch implements ShouldQueue
             "fas fa-globe",
             "fas fa-network-wired"
         ];
-        
+
         $metricsFriendlyName = [
             "Blocked Domains",
             "Blocked Percent",
@@ -100,46 +100,46 @@ class fetch implements ShouldQueue
             "Queries",
             "Clients",
         ];
-        
+
         $defaultRoom = Rooms::where('default', true)->first()->id;
-        
+
         if ($response->ok() && $response->json()) {
             $jsonResponse = $response->json();
-            
+
             $device = Devices::where('token', $token)->First();
             if ($device !== false) {
                 $device->setHeartbeat();
-                
+
                 if (!$device->approved) {
                     $this->delete();
                     return;
                     die();
                 }
-                
+
                 foreach ($metrics as $metric) {
                     if (!isset($jsonResponse[$metric])) {
                         continue;
                     }
-                    
+
                     $property = Properties::where('type', $metric)->where('device_id', $device->id)->First();
-                    
+
                     if ($property == false) {
                         $property = new Properties();
                         $property->device_id = $device->id;
                         $property->room_id = $defaultRoom;
-                        $property->nick_name = "pihole".$metricsName[$metric_key];
+                        $property->nick_name = "pihole" . $metricsName[$metric_key];
                         $property->icon = $metricsIcons[$metric_key];
                         $property->type = $metric;
                         $property->save();
                     }
-                    
+
                     $record = new Records();
                     $record->property_id = $property->id;
                     $record->value = (int) $jsonResponse[$metric];
+                    $record->origin = 'module:pihole';
                     $record->done = true;
                     $record->save();
                 }
-                
             } else {
                 $device = new Devices();
                 $device->token = $token;

@@ -39,45 +39,59 @@ class SynchronizationJob implements ShouldQueue
         $token = Str::lower(md5("sun"));
         $device = Devices::where('token', $token)->First();
         $device->setHeartbeat();
-        $property = Properties::where('type', 'state')->where('device_id', $device->id)->First();
 
-        if (null != $device) {
-            $homeLocationCoordinates = Locations::where("name", "home")->get('position')->first();
-            if (null != $homeLocationCoordinates) {
+        if (null == $device) {
+            return;
+        }
 
-                $lattitude = $homeLocationCoordinates->position[0];
-                $longtitude = $homeLocationCoordinates->position[1];
+        if (!$device->approved) {
+            return false;
+        }
 
-                $sunInfo = date_sun_info(time(), $lattitude, $longtitude);
+        $property = Properties::where('type', 'event')->where('device_id', $device->id)->First();
+        if (null == $property) {
+            return;
+        }
 
-                if (
-                    time() > $sunInfo['civil_twilight_begin'] && time() < $sunInfo['sunrise']
-                ) {
-                    $sunStage = "sunrise";
-                } else if (
-                    time() > $sunInfo['sunrise'] && time() < $sunInfo['sunset']
-                ) {
-                    $sunStage = "day";
-                } else if (
-                    time() > $sunInfo['sunset'] && time() < $sunInfo['civil_twilight_end']
-                ) {
-                    $sunStage = "sunset";
-                } else if (
-                    time() > $sunInfo['civil_twilight_end'] && time()
-                ) {
-                    $sunStage = "night";
-                }
+        $homeLocationCoordinates = Locations::where("name", "home")->get('position')->first();
+        if (null == $homeLocationCoordinates) {
+            return;
+        }
 
-                $this->createRecord($property->id, $sunStage);
-            }
+        $lattitude = $homeLocationCoordinates->position[0];
+        $longtitude = $homeLocationCoordinates->position[1];
+        $sunInfo = date_sun_info(time(), $lattitude, $longtitude);
+
+        if (
+            time() > $sunInfo['civil_twilight_begin'] && time() < $sunInfo['sunrise']
+        ) {
+            $sunStage = "sunrise";
+        } else if (
+            time() > $sunInfo['sunrise'] && time() < $sunInfo['sunset']
+        ) {
+            $sunStage = "day";
+        } else if (
+            time() > $sunInfo['sunset'] && time() < $sunInfo['civil_twilight_end']
+        ) {
+            $sunStage = "sunset";
+        } else if (
+            time() > $sunInfo['civil_twilight_end'] && time()
+        ) {
+            $sunStage = "night";
+        }
+
+        if (null == $property->latestRecord || $property->latestRecord->value != $sunStage) {
+            $this->createRecord($property->id, $sunStage);
         }
     }
 
     public function createRecord($propertyId, $value)
     {
+        //TODO: States to ENUM
         $record = new Records();
         $record->property_id = $propertyId;
         $record->value = (string) $value;
+        $record->origin = 'module:sun';
         $record->done = true;
         $record->save();
     }

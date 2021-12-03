@@ -144,6 +144,7 @@ class fetch implements ShouldQueue
         $record = new Records();
         $record->property_id = $propertyId;
         $record->value = (int) round($value);
+        $record->origin = 'module:openweathermap';
         $record->done = true;
         $record->save();
     }

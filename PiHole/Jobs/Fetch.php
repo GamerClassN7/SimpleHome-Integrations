@@ -86,11 +86,11 @@ class fetch implements ShouldQueue
         ];
 
         $metricsIcons = [
-            "fas fa-list",
-            "fas fa-chart-pie",
-            "fas fa-hand-paper",
-            "fas fa-globe",
-            "fas fa-network-wired"
+            "fa-list",
+            "fa-chart-pie",
+            "fa-hand-paper",
+            "fa-globe",
+            "fa-network-wired"
         ];
 
         $metricsFriendlyName = [

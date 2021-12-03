@@ -63,7 +63,7 @@ class SynchronizationJob implements ShouldQueue
         $sunInfo = date_sun_info(time(), $lattitude, $longtitude);
 
         if (
-            time() > $sunInfo['civil_twilight_begin'] && time() < $sunInfo['sunrise']
+            time() > $sunInfo['astronomical_twilight_begin'] && time() < $sunInfo['sunrise']
         ) {
             $sunStage = "sunrise";
         } else if (
@@ -71,11 +71,11 @@ class SynchronizationJob implements ShouldQueue
         ) {
             $sunStage = "day";
         } else if (
-            time() > $sunInfo['sunset'] && time() < $sunInfo['civil_twilight_end']
+            time() > $sunInfo['sunset'] && time() < $sunInfo['astronomical_twilight_end']
         ) {
             $sunStage = "sunset";
         } else if (
-            time() > $sunInfo['civil_twilight_end'] && time()
+            time() > $sunInfo['astronomical_twilight_end'] && time()
         ) {
             $sunStage = "night";
         }

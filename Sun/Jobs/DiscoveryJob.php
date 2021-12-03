@@ -75,6 +75,7 @@ class DiscoveryJob implements ShouldQueue
         $property = new Properties();
         $property->device_id = $deviceId;
         $property->room_id = $defaultRoomId;
+        $property->is_hidden = True;
         $property->nick_name = "sun.state";
         $property->icon = $metricIcon;
         $property->type = $type;

@@ -1,0 +1,13 @@
+{
+    "name": "Sun",
+    "alias": "sun",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Sun\\Providers\\SunServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

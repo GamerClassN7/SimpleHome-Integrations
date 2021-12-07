@@ -40,9 +40,9 @@ class SyncCommand extends Command
      */
     public function handle()
     {
-        Sync::dispatchNow();
+        (new Sync)->dispatchNow();
         $this->info('Synchronization done!');
-        Fetch::dispatchNow();
+        (new Fetch)->dispatchNow();
         $this->info('Running Fetch to add get states!');
 
         return 0;

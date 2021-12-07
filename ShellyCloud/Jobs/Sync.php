@@ -45,10 +45,10 @@ class sync implements ShouldQueue
         if ($response->ok()) {
             /*Room Sync*/
             $roomsList = $response->json()["data"]["rooms"];
-            $this->roomsSynchronization($roomsList);
+            self::roomsSynchronization($roomsList);
 
             /*Device Sync*/
-            $this->devicesSynchronization($response->json()["data"]["devices"], $roomsList);
+            self::devicesSynchronization($response->json()["data"]["devices"], $roomsList);
         }
         return true;
     }
@@ -73,6 +73,7 @@ class sync implements ShouldQueue
         $device->integration = "shellyCloud";
         $device->type = $type;
         $device->approved = 0;
+        $device->approved = 180000;
         $device->save();
         return $device;
     }
@@ -97,30 +98,41 @@ class sync implements ShouldQueue
             $roomId = Rooms::where('name', Str::lower($roomSlug))->first()->id;
 
             if (Devices::where('token', Str::lower($ShellyDevice["id"]))->count() == 0) {
-                $device = $this->createDevice($ShellyDevice["id"], $ShellyDevice["name"], $ShellyDevice["category"]);
+                $device = self::createDevice($ShellyDevice["id"], $ShellyDevice["name"], $ShellyDevice["category"]);
                 //TODO: Fill in creation date
             } elseif ($device = Devices::where('token', Str::lower($ShellyDevice["id"]))->First()) {
                 $device->hostname = $ShellyDevice["name"];
                 $device->save();
             }
 
-            $this->propertiesSynchronization($ShellyDevice, $device, $roomId);
+            $device->setHeartbeat();
+            self::propertiesSynchronization($ShellyDevice, $device, $roomId);
         }
     }
 
     private function propertiesSynchronization($deviceData, $device, $roomId)
     {
         if (Properties::where('nick_name', "shellycloud." . $deviceData["name"] . ".rssi")->count() == 0) {
-            $this->createProperty($device, "wifi", $roomId, "fa-wifi", "dbm");
+            self::createProperty($device, "wifi", $roomId, "fa-wifi", "dbm");
         }
 
         if (Properties::where('nick_name', "shellycloud." .  $deviceData["name"] . ".power")->count() == 0) {
-            $this->createProperty($device, "power", $roomId, "fa-bolt", "W");
+            self::createProperty($device, "power", $roomId, "fa-bolt", "W");
+        }
+
+        if ($device->type == "sensor") {
+            if (isset($device_status["tmp"])) {
+                self::createProperty($device, "temp", $roomId, "fa-thermometer-empty", "C");
+            }
+
+            if (isset($device_status["hum"])) {
+                self::createProperty($device, "humi", $roomId, "fa-tint", "%");
+            }
         }
 
         for ($i = 1; $i <= $deviceData["channels_count"]; $i++) {
             if (Properties::where('nick_name', "shellycloud." . $deviceData["name"] . ".relay_" . $i)->count() == 0) {
-                $this->createProperty($device, "relay", $roomId, "fa-power-off", "", $i);
+                self::createProperty($device, "relay", $roomId, "fa-power-off", "", $i);
             } elseif ($property = Properties::where('nick_name', "shellycloud." . $deviceData["name"] . 'relay_' . $i)->First()) {
                 $property->room_id = $roomId;
                 $property->save();

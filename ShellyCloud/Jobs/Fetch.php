@@ -45,19 +45,62 @@ class fetch implements ShouldQueue
             'auth_key' => SettingManager::get("apiToken", "shellycloud")->value
         ]);
 
+
         if ($response->ok() === false) {
             return;
         }
 
         foreach ($response->json()["data"]["devices_status"]  as $device_token => $device_status) {
             $device = Devices::where('token', Str::lower($device_token))->First();
+
             if ($device === false) {
                 return false;
             }
+
             $device->setHeartbeat();
 
             if (!$device->approved) {
                 return false;
+            }
+
+            if (isset($device_status["relays"]) && count($device_status["relays"]) > 0) {
+                foreach ($device_status["relays"] as $key => $relay) {
+                    $pseudoId = (int) $key;
+                    $property = Properties::where('nick_name', "shellycloud." . $device->hostname . '.relay_' . ($pseudoId + 1))->First();
+
+                    if (!isset($property->last_value->value) || $property->last_value->value != (int) $relay["ison"]) {
+                        $record = new Records();
+                        $record->property_id = $property->id;
+                        $record->value = (int) $relay["ison"];
+                        $record->origin = 'module:shelly';
+                        $record->done = true;
+                        $record->save();
+                    }
+                }
+            }
+
+            if (isset($device_status["tmp"])) {
+                $property = Properties::where('nick_name', "shellycloud." . $device->hostname . '.temp')->First();
+                if (!isset($property->last_value->value) || $property->last_value->value != (int) $device_status["tmp"]["value"]) {
+                    $record = new Records();
+                    $record->property_id = $property->id;
+                    $record->value = (int) $device_status["tmp"]["value"];
+                    $record->origin = 'module:shelly';
+                    $record->done = true;
+                    $record->save();
+                }
+            }
+
+            if (isset($device_status["hum"])) {
+                $property = Properties::where('nick_name', "shellycloud." . $device->hostname . '.humi')->First();
+                if (!isset($property->last_value->value) || $property->last_value->value != (int) $device_status["hum"]["value"]) {
+                    $record = new Records();
+                    $record->property_id = $property->id;
+                    $record->value = (int) $device_status["hum"]["value"];
+                    $record->origin = 'module:shelly';
+                    $record->done = true;
+                    $record->save();
+                }
             }
 
             if (isset($device_status["relays"]) && count($device_status["relays"]) > 0) {

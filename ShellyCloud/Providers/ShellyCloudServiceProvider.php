@@ -38,6 +38,7 @@ class ShellyCloudServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerCommands();
 
+        //Sync::handle();
         //Fetch::handle();
 
         $this->app->booted(function () {

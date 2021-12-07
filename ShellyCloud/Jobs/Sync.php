@@ -121,21 +121,20 @@ class sync implements ShouldQueue
         }
 
         if ($device->type == "sensor") {
-            if (isset($device_status["tmp"])) {
+            if (Properties::where('nick_name', "shellycloud." .  $deviceData["name"] . ".temp")->count() == 0) {
                 self::createProperty($device, "temp", $roomId, "fa-thermometer-empty", "C");
             }
-
-            if (isset($device_status["hum"])) {
+            if (Properties::where('nick_name', "shellycloud." .  $deviceData["name"] . ".humi")->count() == 0) {
                 self::createProperty($device, "humi", $roomId, "fa-tint", "%");
             }
-        }
-
-        for ($i = 1; $i <= $deviceData["channels_count"]; $i++) {
-            if (Properties::where('nick_name', "shellycloud." . $deviceData["name"] . ".relay_" . $i)->count() == 0) {
-                self::createProperty($device, "relay", $roomId, "fa-power-off", "", $i);
-            } elseif ($property = Properties::where('nick_name', "shellycloud." . $deviceData["name"] . 'relay_' . $i)->First()) {
-                $property->room_id = $roomId;
-                $property->save();
+        } else {
+            for ($i = 1; $i <= $deviceData["channels_count"]; $i++) {
+                if (Properties::where('nick_name', "shellycloud." . $deviceData["name"] . ".relay_" . $i)->count() == 0) {
+                    self::createProperty($device, "relay", $roomId, "fa-power-off", "", $i);
+                } elseif ($property = Properties::where('nick_name', "shellycloud." . $deviceData["name"] . 'relay_' . $i)->First()) {
+                    $property->room_id = $roomId;
+                    $property->save();
+                }
             }
         }
     }

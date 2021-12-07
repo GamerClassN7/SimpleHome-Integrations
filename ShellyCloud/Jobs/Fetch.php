@@ -45,8 +45,7 @@ class fetch implements ShouldQueue
             'auth_key' => SettingManager::get("apiToken", "shellycloud")->value
         ]);
 
-
-        if ($response->ok() === false) {
+        if ($response->ok() == false) {
             return;
         }
 
@@ -54,13 +53,13 @@ class fetch implements ShouldQueue
             $device = Devices::where('token', Str::lower($device_token))->First();
 
             if ($device === false) {
-                return false;
+                continue;
             }
 
             $device->setHeartbeat();
 
             if (!$device->approved) {
-                return false;
+                continue;
             }
 
             if (isset($device_status["relays"]) && count($device_status["relays"]) > 0) {

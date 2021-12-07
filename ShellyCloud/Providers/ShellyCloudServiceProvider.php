@@ -42,9 +42,9 @@ class ShellyCloudServiceProvider extends ServiceProvider
         //Fetch::handle();
 
         $this->app->booted(function () {
-            $schedule = $this->app->make(Schedule::class);
-            $schedule->command('simplehome:shellycloud:sync')->hourly();
-            $schedule->command('simplehome:shellycloud:fetch')->cron("* * * * *");
+            //$schedule = $this->app->make(Schedule::class);
+            //$schedule->command('simplehome:shellycloud:sync')->hourly();
+            // $schedule->command('simplehome:shellycloud:fetch')->cron("* * * * *");
         });
     }
 
